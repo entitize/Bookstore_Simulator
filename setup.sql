@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS customers;
 DROP TABLE IF EXISTS authors;
 
 CREATE TABLE authors (
-    auth_id      CHAR(10),
+    auth_id      INT           AUTO_INCREMENT,
     first_name   VARCHAR(25)   NOT NULL,
     last_name    VARCHAR(25)   NOT NULL,
     country      VARCHAR(35)   NOT NULL,
@@ -13,22 +13,23 @@ CREATE TABLE authors (
 );
 
 CREATE TABLE customers (
-    cust_id        CHAR(10),
+    cust_id        VARCHAR(10),
     first_name     VARCHAR(25)     NOT NULL,
     last_name      VARCHAR(25)     NOT NULL,
     num_purchases  INT             NOT NULL,
-    total_spent    NUMERIC(5, 2)   NOT NULL,
+    total_spent    NUMERIC(7, 2)   NOT NULL,
     PRIMARY KEY (cust_id),
     CHECK (num_purchases >= 0),
     CHECK (total_spent >= 0)
 );
 
+-- curr_price is in USD
 CREATE TABLE books (
-    book_id        CHAR(10),
+    book_id        INT             AUTO_INCREMENT,
     title          VARCHAR(45)     NOT NULL,
-    auth_id        CHAR(10)        NOT NULL,
+    auth_id        INT             NOT NULL,
     genre          VARCHAR(15)     NOT NULL,
-    curr_price     NUMERIC(2, 2)   NOT NULL,
+    curr_price     NUMERIC(4, 2)   NOT NULL,
     PRIMARY KEY (book_id),
     FOREIGN KEY (auth_id) REFERENCES authors(auth_id) 
     ON DELETE CASCADE ON UPDATE CASCADE,
@@ -37,8 +38,8 @@ CREATE TABLE books (
 
 CREATE TABLE ratings (
     rating_id      INT             AUTO_INCREMENT,
-    cust_id        CHAR(10)        NOT NULL,
-    book_id        CHAR(10)        NOT NULL,
+    cust_id        VARCHAR(10)     NOT NULL,
+    book_id        INT             NOT NULL,
     rating         INT             NOT NULL,
     PRIMARY KEY (rating_id),
     FOREIGN KEY (cust_id) REFERENCES customers(cust_id) 
@@ -48,32 +49,19 @@ CREATE TABLE ratings (
     CHECK (rating IN (1, 2, 3, 4, 5))
 );
 
--- specific details about a given track on a playlist
--- contains the track's unique uri code, the name of the track, the
--- artist who made the track's uri code and the track's album's uri code
--- and the playlist this track is on's uri code, the duration of the track,
--- the url at which the track can be previewed, the songs popularity rating,
--- (a numerical value) and the timestamp of when
--- the track was added to the playlist, and who added the song to the
--- playlist (name of the user)
--- all of the fields except the preview url and added by can't be null
--- this table depends on artist, album, and playlist
-CREATE TABLE track (
-    track_uri       VARCHAR(100),
-    track_name      VARCHAR(250)    NOT NULL,
-    artist_uri      VARCHAR(100)    NOT NULL,
-    album_uri       VARCHAR(100)    NOT NULL,
-    playlist_uri    VARCHAR(100)    NOT NULL,
-    duration_ms     VARCHAR(10)     NOT NULL,
-    preview_url     VARCHAR(300),
-    popularity      VARCHAR(10)     NOT NULL,
-    added_at        TIMESTAMP       NOT NULL,
-    added_by        VARCHAR(50),
-    PRIMARY KEY (track_uri),
-    FOREIGN KEY (artist_uri) REFERENCES artist(artist_uri) 
+CREATE TABLE purchases (
+    purchase_id      INT             AUTO_INCREMENT,
+    book_id          INT             NOT NULL,
+    cust_id          VARCHAR(10)     NOT NULL,
+    purchase_ts      TIMESTAMP       NOT NULL,
+    purchase_price   NUMERIC(4, 2)   NOT NULL,
+    PRIMARY KEY (purchase_id),
+    FOREIGN KEY (cust_id) REFERENCES customers(cust_id) 
     ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (album_uri) REFERENCES album(album_uri) 
+    FOREIGN KEY (book_id) REFERENCES books(book_id) 
     ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (playlist_uri) REFERENCES playlist(playlist_uri) 
-    ON DELETE CASCADE ON UPDATE CASCADE
+    CHECK (purchase_price > 0)
 );
+
+CREATE INDEX idx_book_rating
+ON ratings (book_id, rating);
