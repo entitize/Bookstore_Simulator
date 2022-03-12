@@ -1,28 +1,12 @@
 """
-This is a template you may start with for your Final Project application.
-You may choose to modify it, or you may start with the example function
-stubs (most of which are incomplete). An example is also posted
-from Lecture 19 on Canvas.
-
-For full credit, remove any irrelevant comments, which are included in the
-template to help you get started. Replace this program overview with a
-brief overview of your application as well (including your name/partners name).
-
-Some sections are provided as recommended program breakdowns, but are optional
-to keep, and you will probably want to extend them based on your application's
-features.
+An application to simulate a book store
 """
-import sys  # to print error messages to sys.stderr
+import sys  
 import mysql.connector
-# To get error codes from the connector, useful for user-friendly
-# error-handling
 import mysql.connector.errorcode as errorcode
 
-# Debugging flag to print errors when debugging that shouldn't be visible
-# to an actual client. Set to False when done testing.
-DEBUG = True
+DEBUG = False
 ADMIN_PASSWORD = "admin"
-conn = None
 
 # ----------------------------------------------------------------------
 # SQL Utility Functions
@@ -36,19 +20,12 @@ def get_conn():
         conn = mysql.connector.connect(
           host='localhost',
           user='root',
-          # Find port in MAMP or MySQL Workbench GUI or with
-          # SHOW VARIABLES WHERE variable_name LIKE 'port';
           port='3306',
-        #   password='adminpw',
           database='cs121_final_project'
         )
         print('Successfully connected.')
         return conn
     except mysql.connector.Error as err:
-        # Remember that this is specific to _database_ users, not
-        # application users. So is probably irrelevant to a client in your
-        # simulated program. Their user information would be in a users table
-        # specific to your database.
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR and DEBUG:
             sys.stderr('Incorrect username or password when connecting to DB.')
         elif err.errno == errorcode.ER_BAD_DB_ERROR and DEBUG:
@@ -62,44 +39,18 @@ def get_conn():
 # ----------------------------------------------------------------------
 # Functions for Command-Line Options/Query Execution
 # ----------------------------------------------------------------------
-def example_query():
-    param1 = ''
+def get_purchases_ratings(all, user_id=""):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
-    sql = 'SELECT col1 FROM table WHERE col2 = \'%s\';' % (param1, )
-    try:
-        cursor.execute(sql)
-        # row = cursor.fetchone()
-        rows = cursor.fetchall()
-        for row in rows:
-            (col1val) = (row) # tuple unpacking!
-            # do stuff with row data
-    except mysql.connector.Error as err:
-        if DEBUG:
-            sys.stderr(err)
-            sys.exit(1)
-        else:
-            sys.stderr('An error occurred, give something useful for clients...')
-
-def get_purchases(all, user_id=""):
-    cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
     if all:
-        sql = 'SELECT * FROM purchases'
+        sql = 'SELECT cust_id, book_id, purchase_ts, purchase_price, rating FROM purchases NATURAL LEFT JOIN ratings;'
     else:
-        sql = 'SELECT * FROM purchases WHERE cust_id = \'%s\';' % (user_id)
+        sql = 'SELECT cust_id, book_id, purchase_ts, purchase_price, rating FROM purchases NATURAL LEFT JOIN ratings WHERE cust_id = \'%s\';' % (user_id)
     try:
         cursor.execute(sql)
-        # row = cursor.fetchone()
         rows = cursor.fetchall()
-        print("Purchases:")
+        print("Purchases and ratings:")
         for row in rows:
-            # row is something like (1, 1, 'kai4567890', datetime.datetime(2020, 1, 1, 0, 0), Decimal('10.23'))
-            # pretty print this row
-            # purchase_id,book_id,cust_id,timestamp,purchase_price
-            row_display = f"purchase_id: {row[0]}, book_id: {row[1]}, cust_id: {row[2]}, timestamp: {row[3]}, purchase_price: {row[4]}"
+            row_display = f"cust_id: {row[0]}, book_id: {row[1]}, timestamp: {row[2]}, purchase_price: {row[3]}, rating: {row[4]}"
             print(row_display)
         if not rows:
             print("No purchases found")
@@ -112,8 +63,6 @@ def get_purchases(all, user_id=""):
 
 def add_author(first_name, last_name, country):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
     sql = 'INSERT INTO authors VALUES (NULL, \'%s\', \'%s\', \'%s\');' % (first_name, last_name, country)
     try:
         cursor.execute(sql)
@@ -132,8 +81,6 @@ def add_author(first_name, last_name, country):
 
 def add_book(title, auth_id, genre, curr_price):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
     sql = 'INSERT INTO books VALUES (NULL, \'%s\', \'%s\', \'%s\', %d);' % (title, auth_id, genre, curr_price)
     try:
         cursor.execute(sql)
@@ -152,11 +99,10 @@ def add_book(title, auth_id, genre, curr_price):
 
 def update_book_price(book_id, new_price):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
     sql = 'UPDATE books SET curr_price = %d WHERE book_id = %d' % (new_price, book_id)
     try:
         cursor.execute(sql)
+        conn.commit()
     except mysql.connector.Error as err:
         if DEBUG:
             sys.stderr(err)
@@ -166,8 +112,6 @@ def update_book_price(book_id, new_price):
 
 def exists(table, column, value, is_num):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
     if is_num:
         sql = f'SELECT * FROM {table} WHERE {column} = {value};'
     else:
@@ -188,14 +132,11 @@ def exists(table, column, value, is_num):
 
 def exists_2_col(table, column, column2, value, value2, is_num, is_num2):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
     if not is_num:
         value = f'\'{value}\''
     if not is_num2:
         value2 = f'\'{value2}\''
     sql = f'SELECT * FROM {table} WHERE {column} = {value} AND {column2} = {value2};'
-    print(sql)
     try:
         cursor.execute(sql)
         rows = cursor.fetchall()
@@ -239,8 +180,9 @@ def register_user():
     print("Executed sql: ", sql)
     try:
         cursor.execute(sql)
-        rows = cursor.fetchall()
+        conn.commit()
         print(f"Registered User: {cust_id}")
+        return cust_id
     except mysql.connector.Error as err:
         if DEBUG:
             sys.stderr(err)
@@ -250,9 +192,6 @@ def register_user():
 
 def purchase_book(user_id, book_id, book_price):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
-    # purchases: purchase_id,book_id,cust_id,timestamp,purchase_price
     sql = 'INSERT INTO purchases VALUES (NULL, %d, \'%s\', NOW(), %d);' % (book_id, user_id, book_price)
     try:
         cursor.execute(sql)
@@ -267,8 +206,6 @@ def purchase_book(user_id, book_id, book_price):
 
 def view_book_info(book_id):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
     sql = 'SELECT * FROM books WHERE book_id = %d;' % (book_id)
     try:
         cursor.execute(sql)
@@ -285,16 +222,34 @@ def view_book_info(book_id):
 
 def make_review(user_id, book_id, rating):
     cursor = conn.cursor()
-    # Remember to pass arguments as a tuple like so to prevent SQL
-    # injection.
     sql = 'INSERT INTO ratings VALUES (NULL, \'%s\', %d, %d);' % (user_id, book_id, rating)
     try:
         cursor.execute(sql)
+        conn.commit()
         sql = 'SELECT LAST_INSERT_ID();'
         cursor.execute(sql)
         rows = cursor.fetchall()
         for row in rows:
             return row[0]
+    except mysql.connector.Error as err:
+        if DEBUG:
+            sys.stderr(err)
+            sys.exit(1)
+        else:
+            sys.stderr('An error occurred, give something useful for clients...')
+
+def show_purchase_dow_stats():
+    cursor = conn.cursor()
+    sql = 'SELECT day_of_week(DATE(purchase_ts)) as day_of_week, COUNT(*) as num_purchases FROM purchases GROUP BY day_of_week;'
+    try:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        print("Purchase Statistics:")
+        for row in rows:
+            row_display = f"day_of_week: {row[0]}, num_purchases: {row[1]}"
+            print(row_display)
+        if not rows:
+            print("No purchases found")
     except mysql.connector.Error as err:
         if DEBUG:
             sys.stderr(err)
@@ -317,9 +272,8 @@ def show_options():
     sending a request to do <x>, etc.
     """
     print('What would you like to do? ')
-    print('  (TODO: provide command-line options)')
     print('  (a) - admin login')
-    print('  (c) - client options')
+    print('  (c) - client login')
     print('  (q) - quit')
     print()
     ans = input('Enter an option: ').lower()
@@ -328,7 +282,40 @@ def show_options():
     elif ans == 'a':
         admin_login()
     elif ans == 'c':
-        show_client_options()
+        client_login()
+
+def display_20_highest_rated_books():
+    cursor = conn.cursor()
+    sql = "SELECT * FROM books NATURAL JOIN (SELECT AVG(rating) as avg_rating, book_id FROM ratings GROUP BY book_id ORDER BY avg_rating LIMIT 20 ) top_20_rated;"
+    try:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        for row in rows:
+            # Example output: (1, "Harry Potter: Philosopher's Stone", 2, 'Fiction', Decimal('10.23'), Decimal('3.0000'))
+            print(f"Book ID: {row[0]}, Title: {row[1]}, Author ID: {row[2]}, Genre: {row[3]}, Price: {row[4]}, Average Rating: {row[5]}")
+    except mysql.connector.Error as err:
+        if DEBUG:
+            sys.stderr(err)
+            sys.exit(1)
+        else:
+            sys.stderr('An error occurred, give something useful for clients...')
+
+def display_20_most_popular_books():
+    cursor = conn.cursor()
+    sql = "SELECT book_id, COUNT(*) as `times_purchased`, title, genre FROM purchases NATURAL JOIN books GROUP BY book_id ORDER BY COUNT(*) LIMIT 20;"
+    try:
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        for row in rows:
+            # Example output: (2, 1, 'Harry Potter: Chamber of Secrets', 'Fiction')
+            print(f"Book ID: {row[0]}, Times Purchased: {row[1]}, Title: {row[2]}, Genre: {row[3]}")
+            # print(row)
+    except mysql.connector.Error as err:
+        if DEBUG:
+            sys.stderr(err)
+            sys.exit(1)
+        else:
+            sys.stderr('An error occurred, give something useful for clients...')
 
 
 # You may choose to support admin vs. client features in the same program, or
@@ -336,11 +323,12 @@ def show_options():
 # database.
 def show_admin_options():
     """
-    Displays options specific for admins, such as adding new data <x>,
-    modifying <x> based on a given id, removing <x>, etc.
+    Displays options specific for admins, such as adding new books or authors,
+    updating prices, and viewing purchase/rating information
     """
     print('What would you like to do? ')
-    print('  (v) - view all purchases')
+    print('  (v) - view all purchases and ratings')
+    print('  (s) - view purchase day of week stats')
     print('  (a) - add author')
     print('  (b) - add book')
     print('  (u) - update book price!')
@@ -352,10 +340,10 @@ def show_admin_options():
     elif ans == 'v':
         get_all = input('Do you want all purchases y/n: ').lower()
         if get_all == 'y':
-            get_purchases(True)
+            get_purchases_ratings(True)
         else:
             user_id = input('What is the user id: ').lower()
-            get_purchases(False, user_id=user_id)
+            get_purchases_ratings(False, user_id=user_id)
     elif ans == 'a':
         first_name = input('What is the author first name: ')
         last_name = input('What is the author last name: ')
@@ -380,27 +368,26 @@ def show_admin_options():
         book_id = int(input('What is the book id: '))
         new_price = float(input('What is the price: '))
         update_book_price(book_id, new_price)
+    elif ans == 's':
+        show_purchase_dow_stats()
+    show_admin_options()
     
 
-def show_client_options():
+def show_client_options(user_id):
     """
     Displays options specific for clients, such as purchasing a book or
     making a review
     """
-    # Ask the user for their user id
-    user_id = input("What is your user id: ").lower()
-    if exists('customers', 'cust_id', user_id, False):
-        print(f"Welcome back {user_id}")
-    else:
-        print("User not found, please register")
-        register_user()  
     print('What would you like to do? ')
     print('  (p) - make a purchase')
     print('  (r) - make a review')
-    print('  (v) - view purchases')
+    print('  (v) - view purchases and rating')
     print('  (b) - see book information')
+    print('  (h) - top 20 highest rated books')
+    print('  (m) - top 20 most popular books')
     print('  (q) - quit')
     print()
+    #TODO add setup client info option
     ans = input('Enter an option: ').lower()
     if ans == 'q':
         quit_ui()
@@ -417,15 +404,21 @@ def show_client_options():
         if exists_2_col('purchases', 'cust_id', 'book_id', user_id, book_id, False, True): # check user purchased book
             if exists_2_col('ratings', 'cust_id', 'book_id', user_id, book_id, False, True):# check if already rated
                 print("You have already rated this book")
-            rating_id = make_review(user_id, book_id, rating)
-            print(f"new rating id: {rating_id}")
+            else:
+                rating_id = make_review(user_id, book_id, rating)
+                print(f"new rating id: {rating_id}")
         else:
             print("You haven't purchased this book so you can't rate it")
     elif ans == 'v':
-        get_purchases(True, user_id)
+        get_purchases_ratings(False, user_id)
     elif ans == 'b':
-        book_id = input('Please enter the book id: ').lower()
+        book_id = int(input('Please enter the book id: '))
         view_book_info(book_id)
+    elif ans == 'h':
+        display_20_highest_rated_books() 
+    elif ans == 'm':
+        display_20_most_popular_books() 
+    show_client_options(user_id)
 
 def quit_ui():
     """
@@ -436,7 +429,7 @@ def quit_ui():
 
 def admin_login():
     """
-    Quits the program, printing a good bye message to the user.
+    Checks the admin login information
     """
     ans = input('Type in the admin password: ').lower()
     if ans == ADMIN_PASSWORD:
@@ -446,6 +439,17 @@ def admin_login():
         print("Incorrect Password Try Again")
         admin_login()
 
+def client_login():
+    """
+    Checks if the client is registered, else lets them register an id
+    """
+    user_id = input("What is your user id: ").lower()
+    if exists('customers', 'cust_id', user_id, False):
+        print(f"Welcome back {user_id}")
+    else:
+        print("User not found, please register")
+        user_id = register_user()  
+    show_client_options(user_id)
 
 def main():
     """
@@ -453,10 +457,6 @@ def main():
     """
     show_options()
 
-
 if __name__ == '__main__':
-    # This conn is a global object that other functinos can access.
-    # You'll need to use cursor = conn.cursor() each time you are
-    # about to execute a query with cursor.execute(<sqlquery>)
     conn = get_conn()
     main()

@@ -1,0 +1,12 @@
+A - ER diagrams
+B - DDL (done)
+C - Functional Dependency Theory
+D - load data (done)
+E - Password Management (need to fix at oh)
+F - Grant Permissions (need to fix at oh)
+G - Relational Algebra 
+H - SQL queries (done)
+I - Procedural SQL (done)
+J - APP (done)
+K - README (done)
+L - Reflection

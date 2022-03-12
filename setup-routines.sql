@@ -1,3 +1,5 @@
+-- DROP FUNCTION IF EXISTS day_of_week;
+-- DROP PROCEDURE IF EXISTS sp_update_customer_purchase_info;
 -- Given: Set the "end of statement" character to ! so we don't confuse MySQL
 DELIMITER !
 -- Given a date value, returns its day of week
