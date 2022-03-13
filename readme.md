@@ -22,7 +22,7 @@ source setup.sql;
 source load-data.sql;
 source setup-routines.sql;
 source setup-passwords.sql;
-source grant-permissions.sql
+source grant-permissions.sql;
 ```
 
 Running the app

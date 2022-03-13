@@ -20,7 +20,8 @@ def get_conn_base():
     try:
         conn = mysql.connector.connect(
             host='localhost',
-            user='root',
+            user='appadmin',
+            password='admin',
             port='3306',
             database='cs121_final_project'
         )
@@ -320,7 +321,7 @@ def register_user():
         register_user()
     first_name = input("Enter first name: ")
     last_name = input("Enter last name: ")
-    password = input("Enter account password")
+    password = input("Enter account password: ")
     num_purchases = 0
     total_spent = 0
     cursor = conn.cursor()
