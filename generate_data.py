@@ -12,11 +12,21 @@ import numpy as np
 def generate_books_df():
     df = pd.DataFrame(columns=['book_id', 'title', 'auth_id', 'genre', 'curr_price'])
     data = []
-    data.append({'book_id': 1, 'title': 'Harry Potter: Philosopher\'s Stone', 'auth_id': 2, 'genre': 'Fiction', 'curr_price': 10.23})
-    data.append({'book_id': 2, 'title': 'Harry Potter: Chamber of Secrets', 'auth_id': 2, 'genre': 'Fiction', 'curr_price': 12.34})
-    data.append({'book_id': 3, 'title': 'The Hobbit', 'auth_id': 3, 'genre': 'Novel', 'curr_price': 23.45})
-    data.append({'book_id': 4, 'title': 'The Lord of the Rings', 'auth_id': 1, 'genre': 'Fiction', 'curr_price': 34.56})
-    data.append({'book_id': 5, 'title': 'The Da Vinci Code', 'auth_id': 1, 'genre': 'Mystery', 'curr_price': 45.67})
+    data.append({'book_id': 1, 'title': 'Harry Potter: Philosopher\'s Stone', 'auth_id': 2, 'genre': 'Fiction', 'curr_price': 10.00})
+    data.append({'book_id': 2, 'title': 'Harry Potter: Chamber of Secrets', 'auth_id': 2, 'genre': 'Fiction', 'curr_price': 12.00})
+    data.append({'book_id': 3, 'title': 'The Hobbit', 'auth_id': 3, 'genre': 'Novel', 'curr_price': 23.00})
+    data.append({'book_id': 4, 'title': 'The Lord of the Rings', 'auth_id': 1, 'genre': 'Fiction', 'curr_price': 34.00})
+    data.append({'book_id': 5, 'title': 'The Da Vinci Code', 'auth_id': 1, 'genre': 'Mystery', 'curr_price': 45.00})
+
+    # Generate 10000 random books
+    for i in range(6, 10000):
+        book_id = i + 1
+        title = 'Random Book ' + str(i) 
+        genre = 'Random Genre ' + str(np.random.randint(1, 10))
+        curr_price = np.random.randint(1, 100)
+        auth_id = np.random.randint(1, 3)
+        data.append({'book_id': book_id, 'title': title, 'auth_id': auth_id, 'genre': genre, 'curr_price': curr_price})
+
     df = pd.DataFrame(data, columns=['book_id', 'title', 'auth_id', 'genre', 'curr_price'])
     df.to_csv('data/books.csv', index=False)
     print("Saved to data/books.csv")
@@ -34,11 +44,25 @@ def generate_authors_df():
 def generate_purchase_df():
     df = pd.DataFrame(columns=['purchase_id', 'book_id', 'cust_id', 'timestamp', 'purchase_price'])
     data = []
-    data.append({'purchase_id': 1, 'book_id': 1, 'cust_id': 'kai4567890', 'timestamp': '2020-01-01', 'purchase_price': 10.23})
-    data.append({'purchase_id': 2, 'book_id': 2, 'cust_id': 'kai4567890', 'timestamp': '2020-01-02', 'purchase_price': 12.34})
-    data.append({'purchase_id': 3, 'book_id': 3, 'cust_id': 'kai4567890', 'timestamp': '2020-01-03', 'purchase_price': 23.45})
     data.append({'purchase_id': 4, 'book_id': 4, 'cust_id': 'kai4567890', 'timestamp': '2020-01-04', 'purchase_price': 34.56})
+    data.append({'purchase_id': 1, 'book_id': 1, 'cust_id': 'kai4567890', 'timestamp': '2020-01-01', 'purchase_price': 10.23})
+    data.append({'purchase_id': 3, 'book_id': 3, 'cust_id': 'kai4567890', 'timestamp': '2020-01-03', 'purchase_price': 23.45})
+    data.append({'purchase_id': 2, 'book_id': 2, 'cust_id': 'kai4567890', 'timestamp': '2020-01-02', 'purchase_price': 12.34})
     data.append({'purchase_id': 5, 'book_id': 5, 'cust_id': 'kai4567890', 'timestamp': '2020-01-05', 'purchase_price': 45.67})
+    # Generate random rows with random timestamps
+    for i in range(6, 10000):
+        # random year between 2020 and 2029
+        year = np.random.randint(2020, 2030)
+        # random month between 1 and 12
+        month = np.random.randint(1, 13)
+        # random day between 1 and 31
+        day = np.random.randint(1, 20)
+        random_timestamp = str(year) + '-' + str(month) + '-' + str(day)
+        # random book_id between 1 and 5
+        random_book_id = np.random.randint(1, 6)
+        purchase_id = i + 1
+        data.append({'purchase_id': purchase_id, 'book_id': random_book_id, 'cust_id': 'kai4567890', 'timestamp': random_timestamp, 'purchase_price': np.random.randint(1, 100)})
+
     df = pd.DataFrame(data, columns=['purchase_id', 'book_id', 'cust_id', 'timestamp', 'purchase_price'])
     df.to_csv('data/purchases.csv', index=False)
     print("Saved to data/purchases.csv")

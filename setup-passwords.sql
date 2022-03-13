@@ -68,38 +68,37 @@ DELIMITER ;
 -- in the user_info table.  Returns 1 if the user appears in the table, and the
 -- specified password hashes to the value for the user. Otherwise returns 0.
 DELIMITER !
-CREATE FUNCTION authenticate(username VARCHAR(10), password VARCHAR(10))
+CREATE FUNCTION authenticate(username_val VARCHAR(10), password VARCHAR(10))
 RETURNS TINYINT DETERMINISTIC
 BEGIN
-  DECLARE salt CHAR(8);
-  DECLARE result TINYINT;
+  DECLARE salt_val CHAR(8);
+  DECLARE result TINYINT DEFAULT 0;
   DECLARE salted_password BINARY(64);
-  SELECT salt INTO salt FROM user_info WHERE username=username LIMIT 1;
-  SELECT SHA2(CONCAT(salt, password), 256) INTO salted_password;
-  SELECT COUNT(*) INTO result FROM user_info WHERE username=username AND password_hash=salted_password;
+  SELECT salt INTO salt_val FROM user_info WHERE username=username_val LIMIT 1;
+  SELECT SHA2(CONCAT(salt_val, password), 256) INTO salted_password;
+  SELECT COUNT(*) INTO result FROM user_info WHERE username=username_val AND password_hash=salted_password;
   RETURN result;
 END !
 DELIMITER ;
 -- [Problem 1c]
 -- Add at least two users into your user_info table so that when we run this file,
 -- we will have examples users in the database.
-CALL sp_add_user("abc", "123");
-CALL sp_add_user("kai4567890", "qwerty");
-CALL sp_add_user("admin", "admin");
+CALL sp_add_user('kai4567890', 'qwerty');
+CALL sp_add_user('admin', 'admin');
 -- [Problem 1d]
 -- Optional: Create a procedure sp_change_password to generate a new salt and change the given
 -- user's password to the given password (after salting and hashing)
 DELIMITER !
-CREATE PROCEDURE sp_change_password(username VARCHAR(10), new_password VARCHAR(10))
+CREATE PROCEDURE sp_change_password(username_val VARCHAR(10), new_password VARCHAR(10))
 BEGIN
-  DECLARE salt CHAR(8);
-  DECLARE password_hash BINARY(64);
-  SELECT make_salt(8) INTO salt;
-  SELECT SHA2(CONCAT(salt, new_password), 256) INTO password_hash;
-  UPDATE user_info SET salt=salt, password_hash=password_hash WHERE username=username;
+  DECLARE salt_val CHAR(8);
+  DECLARE password_hash_val BINARY(64);
+  SELECT make_salt(8) INTO salt_val;
+  SELECT SHA2(CONCAT(salt_val, new_password), 256) INTO password_hash_val;
+  UPDATE user_info SET salt=salt_val, password_hash=password_hash_val WHERE username=username_val;
 END !
 DELIMITER ;
 
 -- Call authenticate
-SELECT authenticate("abc", "123");
-CALL sp_change_password("abc", "321");
+SELECT authenticate('kai4567890', 'qwerty');
+CALL sp_change_password('kai4567890', '321');

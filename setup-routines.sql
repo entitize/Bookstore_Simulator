@@ -1,3 +1,9 @@
+DROP TRIGGER IF EXISTS trg_purchases_insert;
+DROP TRIGGER IF EXISTS trg_purchases_update;
+DROP TRIGGER IF EXISTS trg_purchases_delete;
+DROP FUNCTION IF EXISTS day_of_week;
+DROP PROCEDURE IF EXISTS sp_update_customer_purchase_info;
+
 -- DROP FUNCTION IF EXISTS day_of_week;
 -- DROP PROCEDURE IF EXISTS sp_update_customer_purchase_info;
 -- Given: Set the "end of statement" character to ! so we don't confuse MySQL
@@ -29,7 +35,7 @@ DELIMITER !
 CREATE PROCEDURE sp_update_customer_purchase_info(
     new_cust_id          CHAR(10),
     num_purchase_change  INT,
-    new_purchase_price   NUMERIC(2, 2)
+    new_purchase_price   NUMERIC(10, 2)
 )
 BEGIN 
     INSERT INTO customers
