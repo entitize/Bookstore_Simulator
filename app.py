@@ -12,33 +12,6 @@ DEBUG = False
 # ----------------------------------------------------------------------
 
 
-def get_conn_base():
-    """"
-    Returns a basic connected MySQL connector instance, if connection is successful.
-    If unsuccessful, exits.
-    """
-    try:
-        conn = mysql.connector.connect(
-            host='localhost',
-            user='appadmin',
-            password='admin',
-            port='3306',
-            database='cs121_final_project'
-        )
-        print('Successfully connected.')
-        return conn
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR and DEBUG:
-            sys.stderr('Incorrect username or password when connecting to DB.')
-        elif err.errno == errorcode.ER_BAD_DB_ERROR and DEBUG:
-            sys.stderr('Database does not exist.')
-        elif DEBUG:
-            sys.stderr(err)
-        else:
-            sys.stderr('An error occurred, please contact the administrator.')
-        sys.exit(1)
-
-
 def get_conn_admin():
     """"
     Returns a connected MySQL connector instance with admin permissions, 
@@ -654,5 +627,5 @@ def main():
 
 
 if __name__ == '__main__':
-    conn = get_conn_base()
+    conn = get_conn_admin()
     main()
