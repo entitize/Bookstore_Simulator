@@ -1,5 +1,7 @@
 # Bookstore
 
+# By Neha Dalia and Kai Nakamura
+
 Setup Instructions
 
 Generate initial data
