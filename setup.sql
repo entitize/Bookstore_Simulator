@@ -39,6 +39,7 @@ CREATE TABLE customers (
 -- and the current price of the book in USD (can't be negative)
 -- the current price can be updated
 -- all of which can't be NULL
+-- A book can only be written by one author
 CREATE TABLE books (
     book_id        INT             AUTO_INCREMENT,
     title          VARCHAR(45)     NOT NULL,
@@ -78,6 +79,7 @@ CREATE TABLE ratings (
 -- purchase_ts is the timestamp the purchase was made
 -- purchase_price is the price of the book in USD (must be non negative)
 -- All of the fields can't be null
+-- only one book can be purchased at a time
 CREATE TABLE purchases (
     purchase_id      INT             AUTO_INCREMENT,
     book_id          INT             NOT NULL,
