@@ -1,6 +1,6 @@
 # Bookstore
 
-# By Neha Dalia and Kai Nakamura
+By Neha Dalia and Kai Nakamura
 
 Setup Instructions
 
